@@ -85,41 +85,49 @@ public class TweetManager {
 				if (tweets.size() == 0) {
 					break;
 				}
-			
+				
+				int countWrong=0;
 				for (Element tweet : tweets) {
-					String usernameTweet = tweet.select("span.username.js-action-profile-name b").text();
-					String txt = tweet.select("p.js-tweet-text").text().replaceAll("[^\\u0000-\\uFFFF]", "");
-					int retweets = Integer.valueOf(tweet.select("span.ProfileTweet-action--retweet span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replaceAll(",", ""));
-					int favorites = Integer.valueOf(tweet.select("span.ProfileTweet-action--favorite span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replaceAll(",", ""));
-					long dateMs = Long.valueOf(tweet.select("small.time span.js-short-timestamp").attr("data-time-ms"));
-					String id = tweet.attr("data-tweet-id");
-					String permalink = tweet.attr("data-permalink-path");
-					
-					String geo = "";
-					Elements geoElement = tweet.select("span.Tweet-geo");
-					if (geoElement.size() > 0) {
-						geo = geoElement.attr("title");
-					}
+					try{
+						String usernameTweet = tweet.select("span.username.js-action-profile-name b").text();
+						String txt = tweet.select("p.js-tweet-text").text().replaceAll("[^\\u0000-\\uFFFF]", "");
+						int retweets = Integer.valueOf(tweet.select("span.ProfileTweet-action--retweet span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replaceAll(",", ""));
+						int favorites = Integer.valueOf(tweet.select("span.ProfileTweet-action--favorite span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replaceAll(",", ""));
+						long dateMs = Long.valueOf(tweet.select("small.time span.js-short-timestamp").attr("data-time-ms"));
+						String id = tweet.attr("data-tweet-id");
+						String permalink = tweet.attr("data-permalink-path");
 
-					Date date = new Date(dateMs);
+						String geo = "";
+						Elements geoElement = tweet.select("span.Tweet-geo");
+						if (geoElement.size() > 0) {
+							geo = geoElement.attr("title");
+						}
+
+						Date date = new Date(dateMs);
+
+						Tweet t = new Tweet();
+						t.setId(id);
+						t.setPermalink("https://twitter.com"+permalink);
+						t.setUsername(usernameTweet);
+						t.setText(txt);
+						t.setDate(date);
+						t.setRetweets(retweets);
+						t.setFavorites(favorites);
+						t.setMentions(processTerms("(@\\w*)", txt));
+						t.setHashtags(processTerms("(#\\w*)", txt));
+						t.setGeo(geo);
+
+						results.add(t);
+
+						if (criteria.getMaxTweets() > 0 && results.size() >= criteria.getMaxTweets()) {
+							break outerLace;
+						}
+						}catch(Exception e){
+							//Some tweets are not saveing correctly
+							count++;
+							System.out.println("Tweet fail "+count);
+						}					
 					
-					Tweet t = new Tweet();
-					t.setId(id);
-					t.setPermalink("https://twitter.com"+permalink);
-					t.setUsername(usernameTweet);
-					t.setText(txt);
-					t.setDate(date);
-					t.setRetweets(retweets);
-					t.setFavorites(favorites);
-					t.setMentions(processTerms("(@\\w*)", txt));
-					t.setHashtags(processTerms("(#\\w*)", txt));
-					t.setGeo(geo);
-					
-					results.add(t);
-					
-					if (criteria.getMaxTweets() > 0 && results.size() >= criteria.getMaxTweets()) {
-						break outerLace;
-					}
 				}
 			}
 		} catch (Exception e) {

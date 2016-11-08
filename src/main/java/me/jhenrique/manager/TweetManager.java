@@ -124,8 +124,8 @@ public class TweetManager {
 						}
 						}catch(Exception e){
 							//Some tweets are not saveing correctly
-							count++;
-							System.out.println("Tweet fail "+count);
+							countWrong++;
+							System.out.println("Tweet fail "+countWrong);
 						}					
 					
 				}

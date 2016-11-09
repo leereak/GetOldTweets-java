@@ -77,7 +77,15 @@ public class TweetManager {
 		try {
 			String refreshCursor = null;
 			outerLace: while (true) {
-				JSONObject json = new JSONObject(getURLResponse(criteria.getUsername(), criteria.getSince(), criteria.getUntil(), criteria.getQuerySearch(), refreshCursor));
+				int countMiss=0;
+				JSONObject json=null;
+				try {
+					json = new JSONObject(getURLResponse(criteria.getUsername(), criteria.getSince(), criteria.getUntil(), criteria.getQuerySearch(), refreshCursor));
+				} catch (Exception e) {
+					countMiss++;
+					System.out.println("miss tweets: "+countMiss);
+					continue;
+				}
 				refreshCursor = json.getString("min_position");
 				Document doc = Jsoup.parse((String) json.get("items_html"));
 				Elements tweets = doc.select("div.js-stream-tweet");

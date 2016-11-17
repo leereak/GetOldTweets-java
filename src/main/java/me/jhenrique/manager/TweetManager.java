@@ -104,6 +104,7 @@ public class TweetManager {
 						long dateMs = Long.valueOf(tweet.select("small.time span.js-short-timestamp").attr("data-time-ms"));
 						String id = tweet.attr("data-tweet-id");
 						String permalink = tweet.attr("data-permalink-path");
+						Elements hashtags=tweet.select("a.twitter-hashtag.pretty-link");
 
 						String geo = "";
 						Elements geoElement = tweet.select("span.Tweet-geo");
@@ -122,7 +123,8 @@ public class TweetManager {
 						t.setRetweets(retweets);
 						t.setFavorites(favorites);
 						t.setMentions(processTerms("(@\\w*)", txt));
-						t.setHashtags(processTerms("(#\\w*)", txt));
+						//t.setHashtags(processTerms("(#\\w*)", txt));
+						t.setHashtags(processHashtags(hashtags));
 						t.setGeo(geo);
 
 						results.add(t);
@@ -155,5 +157,13 @@ public class TweetManager {
 		
 		return sb.toString().trim();
 	}
-	
+	private static String processHashtags(Elements hashtags) {
+		StringBuilder sb = new StringBuilder();
+		for(Element hashtag:hashtags){
+			sb.append(hashtag.text());
+			sb.append(" ");
+		}
+		
+		return sb.toString().trim();
+	}
 }
